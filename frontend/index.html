@@ -1,172 +1,384 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Certificate Generator</title>
 
     <style>
 
-        body {
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
 
-            margin: 0;
-            padding: 20px;
+        body{
 
             font-family: Arial, sans-serif;
 
-            background-image: url('https://images.unsplash.com/photo-1522071820081-009f0129c71c');
-            background-size: cover;
-            background-position: center;
+            min-height:100vh;
+
+            background-image:
+                    linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)),
+                    url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f');
+
+            background-size:cover;
+            background-position:center;
+
+            display:flex;
+            justify-content:center;
+            align-items:center;
+
+            padding:30px;
         }
 
-        .container {
+        .main-container{
 
-            text-align: center;
+            width:100%;
+            max-width:1100px;
 
-            background: rgba(255,255,255,0.9);
+            background:rgba(255,255,255,0.95);
 
-            padding: 20px;
+            border-radius:20px;
 
-            width: 450px;
+            padding:30px;
 
-            margin: auto;
-
-            border-radius: 10px;
+            box-shadow:0 10px 30px rgba(0,0,0,0.3);
         }
 
-        input {
+        .title{
 
-            padding: 10px;
-
-            margin: 8px;
-
-            width: 80%;
+            text-align:center;
+            margin-bottom:25px;
         }
 
-        button {
+        .title h1{
 
-            padding: 10px 15px;
-
-            margin: 10px;
-
-            cursor: pointer;
+            color:#1a237e;
+            margin-bottom:10px;
         }
 
-        canvas {
+        .form-section{
 
-            display: none;
+            display:flex;
+            justify-content:center;
+            gap:15px;
+            flex-wrap:wrap;
 
-            margin: 20px auto;
+            margin-bottom:25px;
+        }
 
-            background: white;
+        input{
 
-            border: 2px solid black;
+            padding:12px;
+
+            width:230px;
+
+            border-radius:10px;
+
+            border:1px solid #ccc;
+
+            font-size:15px;
+        }
+
+        button{
+
+            padding:12px 20px;
+
+            border:none;
+
+            border-radius:10px;
+
+            background:#1a237e;
+
+            color:white;
+
+            font-size:15px;
+
+            cursor:pointer;
+
+            transition:0.3s;
+        }
+
+        button:hover{
+
+            background:#3949ab;
+        }
+
+        .canvas-container{
+
+            display:flex;
+            justify-content:center;
+        }
+
+        canvas{
+
+            display:none;
+
+            border:10px solid #d4af37;
+
+            background:white;
+
+            box-shadow:0 5px 20px rgba(0,0,0,0.3);
         }
 
     </style>
-
 </head>
 
 <body>
 
-<div class="container">
+<div class="main-container">
 
-    <h2>Certificate Generator</h2>
+    <div class="title">
 
-    <input type="text" id="studentName" placeholder="Student Name"><br>
+        <h1>Certificate Generator</h1>
+        <p>Create Professional Certificates</p>
 
-    <input type="text" id="courseName" placeholder="Course Name"><br>
+    </div>
 
-    <input type="date" id="issueDate"><br>
+    <div class="form-section">
 
-    <button onclick="generateCertificate()">
-        Generate Certificate
-    </button>
+        <input type="text"
+               id="studentName"
+               placeholder="Enter Student Name">
 
-    <button onclick="downloadCertificate()">
-        Download Image
-    </button>
+        <input type="text"
+               id="courseName"
+               placeholder="Enter Course Name">
+
+        <input type="date"
+               id="issueDate">
+
+        <button onclick="generateCertificate()">
+            Generate Certificate
+        </button>
+
+        <button onclick="downloadCertificate()">
+            Download Certificate
+        </button>
+
+    </div>
+
+    <div class="canvas-container">
+
+        <canvas id="certificateCanvas"
+                width="1000"
+                height="700"></canvas>
+
+    </div>
 
 </div>
 
-<canvas id="canvas" width="900" height="600"></canvas>
-
 <script>
 
-    let qrImage = new Image();
-    qrImage.src = "https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=Certificate";
+    const canvas =
+        document.getElementById("certificateCanvas");
 
-    let logo = new Image();
-    logo.src = "https://cdn-icons-png.flaticon.com/512/1828/1828884.png";
+    const ctx =
+        canvas.getContext("2d");
 
-    function generateCertificate() {
+    const logo =
+        new Image();
 
-        const canvas = document.getElementById("canvas");
-        const ctx = canvas.getContext("2d");
+    logo.src =
+        "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
 
-        const name = document.getElementById("studentName").value;
-        const course = document.getElementById("courseName").value;
-        const date = document.getElementById("issueDate").value;
+    const qr =
+        new Image();
 
-        if(name === "" || course === "" || date === "") {
-            alert("Please fill all fields");
+    qr.src =
+        "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=CertificateVerification";
+
+    function generateCertificate(){
+
+        const studentName =
+            document.getElementById("studentName").value;
+
+        const courseName =
+            document.getElementById("courseName").value;
+
+        const issueDate =
+            document.getElementById("issueDate").value;
+
+        if(studentName === "" ||
+            courseName === "" ||
+            issueDate === ""){
+
+            alert("Please fill all details");
+
             return;
         }
 
         canvas.style.display = "block";
 
         // Background
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Border
+        ctx.fillStyle = "#fffdf5";
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+
+        // Outer Border
+
+        ctx.strokeStyle = "#d4af37";
+        ctx.lineWidth = 15;
+        ctx.strokeRect(20,20,960,660);
+
+        // Inner Border
+
         ctx.strokeStyle = "#000";
-        ctx.lineWidth = 4;
-        ctx.strokeRect(20, 20, 860, 560);
+        ctx.lineWidth = 3;
+        ctx.strokeRect(40,40,920,620);
 
-        // 🔵 LOGO TOP LEFT (FIXED)
-        ctx.drawImage(logo, 30, 30, 80, 80);
+        // Logo
 
-        // Company Name (Top Center)
-        ctx.fillStyle = "#333";
-        ctx.font = "28px Arial";
+        ctx.drawImage(logo,60,50,90,90);
+
+        // Company Name
+
+        ctx.fillStyle = "#1a237e";
+
+        ctx.font = "bold 40px Georgia";
+
         ctx.textAlign = "center";
-        ctx.fillText("MY COMPANY", 450, 70);
 
-        // Title
+        ctx.fillText(
+            "YASHWANTH TECHNOLOGIES",
+            500,
+            90
+        );
+
+        // Subtitle
+
         ctx.font = "24px Arial";
-        ctx.fillText("CERTIFICATE OF COMPLETION", 450, 150);
+
+        ctx.fillStyle = "#444";
+
+        ctx.fillText(
+            "Certificate of Completion",
+            500,
+            160
+        );
+
+        // Decorative line
+
+        ctx.beginPath();
+        ctx.moveTo(250,180);
+        ctx.lineTo(750,180);
+        ctx.strokeStyle = "#d4af37";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Main Text
+
+        ctx.font = "28px Arial";
+        ctx.fillStyle = "#000";
+
+        ctx.fillText(
+            "This certificate is proudly presented to",
+            500,
+            260
+        );
 
         // Student Name
-        ctx.font = "22px Arial";
-        ctx.fillText("Student: " + name, 450, 240);
+
+        ctx.font = "bold 42px Georgia";
+        ctx.fillStyle = "#b8860b";
+
+        ctx.fillText(
+            studentName,
+            500,
+            340
+        );
+
+        // Course text
+
+        ctx.font = "28px Arial";
+        ctx.fillStyle = "#000";
+
+        ctx.fillText(
+            "for successfully completing the course",
+            500,
+            410
+        );
 
         // Course Name
-        ctx.fillText("Course: " + course, 450, 290);
+
+        ctx.font = "bold 36px Georgia";
+        ctx.fillStyle = "#1a237e";
+
+        ctx.fillText(
+            courseName,
+            500,
+            480
+        );
 
         // Date
-        ctx.fillText("Date: " + date, 450, 340);
 
-        // Description
-        ctx.font = "18px Arial";
-        ctx.fillText("This certificate is awarded for successful completion.", 450, 400);
+        ctx.font = "22px Arial";
+        ctx.fillStyle = "#333";
 
-        // Signature (Bottom Right)
-        ctx.fillText("Admin Signature", 720, 520);
+        ctx.fillText(
+            "Issued Date: " + issueDate,
+            500,
+            550
+        );
 
-        // QR Code (Bottom Left)
-        ctx.drawImage(qrImage, 50, 470, 100, 100);
+        // QR Code
+
+        ctx.drawImage(
+            qr,
+            70,
+            520,
+            120,
+            120
+        );
+
+        // Signature Line
+
+        ctx.beginPath();
+        ctx.moveTo(720,580);
+        ctx.lineTo(900,580);
+        ctx.strokeStyle = "#000";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Signature Text
+
+        ctx.font = "22px Arial";
+
+        ctx.fillText(
+            "Authorized Signature",
+            810,
+            620
+        );
+
     }
 
     function downloadCertificate() {
 
-        const canvas = document.getElementById("canvas");
+        if(canvas.style.display === "none"){
 
-        const link = document.createElement("a");
+            alert("Generate certificate first");
+
+            return;
+        }
+
+        const image =
+            canvas.toDataURL("image/png");
+
+        const link =
+            document.createElement("a");
+
+        link.href = image;
 
         link.download = "certificate.png";
-        link.href = canvas.toDataURL("image/png");
+
+        document.body.appendChild(link);
 
         link.click();
+
+        document.body.removeChild(link);
     }
 
 </script>
