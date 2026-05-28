@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Certificate Generator</title>
+
+    <style>
+
+        body {
+
+            margin: 0;
+            padding: 20px;
+
+            font-family: Arial, sans-serif;
+
+            background-image: url('https://images.unsplash.com/photo-1522071820081-009f0129c71c');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .container {
+
+            text-align: center;
+
+            background: rgba(255,255,255,0.9);
+
+            padding: 20px;
+
+            width: 450px;
+
+            margin: auto;
+
+            border-radius: 10px;
+        }
+
+        input {
+
+            padding: 10px;
+
+            margin: 8px;
+
+            width: 80%;
+        }
+
+        button {
+
+            padding: 10px 15px;
+
+            margin: 10px;
+
+            cursor: pointer;
+        }
+
+        canvas {
+
+            display: none;
+
+            margin: 20px auto;
+
+            background: white;
+
+            border: 2px solid black;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>Certificate Generator</h2>
+
+    <input type="text" id="studentName" placeholder="Student Name"><br>
+
+    <input type="text" id="courseName" placeholder="Course Name"><br>
+
+    <input type="date" id="issueDate"><br>
+
+    <button onclick="generateCertificate()">
+        Generate Certificate
+    </button>
+
+    <button onclick="downloadCertificate()">
+        Download Image
+    </button>
+
+</div>
+
+<canvas id="canvas" width="900" height="600"></canvas>
+
+<script>
+
+    let qrImage = new Image();
+    qrImage.src = "https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=Certificate";
+
+    let logo = new Image();
+    logo.src = "https://cdn-icons-png.flaticon.com/512/1828/1828884.png";
+
+    function generateCertificate() {
+
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+
+        const name = document.getElementById("studentName").value;
+        const course = document.getElementById("courseName").value;
+        const date = document.getElementById("issueDate").value;
+
+        if(name === "" || course === "" || date === "") {
+            alert("Please fill all fields");
+            return;
+        }
+
+        canvas.style.display = "block";
+
+        // Background
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Border
+        ctx.strokeStyle = "#000";
+        ctx.lineWidth = 4;
+        ctx.strokeRect(20, 20, 860, 560);
+
+        // 🔵 LOGO TOP LEFT (FIXED)
+        ctx.drawImage(logo, 30, 30, 80, 80);
+
+        // Company Name (Top Center)
+        ctx.fillStyle = "#333";
+        ctx.font = "28px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText("MY COMPANY", 450, 70);
+
+        // Title
+        ctx.font = "24px Arial";
+        ctx.fillText("CERTIFICATE OF COMPLETION", 450, 150);
+
+        // Student Name
+        ctx.font = "22px Arial";
+        ctx.fillText("Student: " + name, 450, 240);
+
+        // Course Name
+        ctx.fillText("Course: " + course, 450, 290);
+
+        // Date
+        ctx.fillText("Date: " + date, 450, 340);
+
+        // Description
+        ctx.font = "18px Arial";
+        ctx.fillText("This certificate is awarded for successful completion.", 450, 400);
+
+        // Signature (Bottom Right)
+        ctx.fillText("Admin Signature", 720, 520);
+
+        // QR Code (Bottom Left)
+        ctx.drawImage(qrImage, 50, 470, 100, 100);
+    }
+
+    function downloadCertificate() {
+
+        const canvas = document.getElementById("canvas");
+
+        const link = document.createElement("a");
+
+        link.download = "certificate.png";
+        link.href = canvas.toDataURL("image/png");
+
+        link.click();
+    }
+
+</script>
+
+</body>
+
+</html>
